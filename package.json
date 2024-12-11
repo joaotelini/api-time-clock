@@ -3,6 +3,8 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.0.1",
     "mysql2": "^3.11.5"
   },
   "type": "module"
