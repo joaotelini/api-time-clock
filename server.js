@@ -47,7 +47,7 @@ app.post('/users', async (req, res) => {
   const ref = db.ref("api-time-clock/users");
 
   try {
-    const snapshot = await ref.equalTo(email).once("value");
+    const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
     if (snapshot.exists()) {
       return res.status(409).json({ message: "Usuário com esse email já cadastrado." });
     }
