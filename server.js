@@ -45,6 +45,7 @@ app.get("/users/:id", async (req, res) => {
 app.post('/users', async (req, res) => {
   const { name, email, password, role } = req.body;
   const ref = db.ref("api-time-clock/users");
+  const trimmedRole = role.trim()
 
   try {
     const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
@@ -58,7 +59,19 @@ app.post('/users', async (req, res) => {
       return res.status(400).json({ message: "Email inválido." });
     }
 
+    if (password.length <= 4) {
+      return res.status(400).json({ message: "Senha curta." });
+    }
+
     const hash = await bcrypt.hash(password, saltRounds);
+
+    if (!name || !email || !password || !trimmedRole) {
+      return res.status(400).json({ message: "Todos os campos devem ser preenchidos." });
+    }
+
+    if (trimmedRole !== "admin" && trimmedRole !== "employee") {
+      return res.status(400).json({ message: "O campo role deve ser 'admin' ou 'employee'." });
+    }
 
     // Gerar um ID único para o usuário com push()
     const userRef = ref.push(); 
@@ -82,7 +95,7 @@ app.delete('/users/:id', async (req, res) => {
 
     if (snapshot.exists()) {
       await ref.remove(); 
-      res.status(200).json({ message: 'Usuário removido com sucesso!' });
+      res.status(200).json({ message: `Usuário ${id} removido com sucesso!` })
     } else {
       res.status(400).json({ message: "ID não encontrado." });
     }
