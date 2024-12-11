@@ -48,15 +48,20 @@ app.post('/users', async (req, res) => {
   const trimmedRole = role.trim()
 
   try {
-    const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
-    if (snapshot.exists()) {
-      return res.status(409).json({ message: "Usuário com esse email já cadastrado." });
+    if (!name || !email || !password || !trimmedRole) {
+      return res.status(400).json({ message: "Todos os campos devem ser preenchidos." });
     }
 
     let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
+    
     if (!regex.test(email)) {
       return res.status(400).json({ message: "Email inválido." });
+    }
+    
+    const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
+    
+    if (snapshot.exists()) {
+      return res.status(409).json({ message: "Usuário com esse email já cadastrado." });
     }
 
     if (password.length <= 4) {
@@ -64,10 +69,6 @@ app.post('/users', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, saltRounds);
-
-    if (!name || !email || !password || !trimmedRole) {
-      return res.status(400).json({ message: "Todos os campos devem ser preenchidos." });
-    }
 
     if (trimmedRole !== "admin" && trimmedRole !== "employee") {
       return res.status(400).json({ message: "O campo role deve ser 'admin' ou 'employee'." });
