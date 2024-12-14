@@ -131,3 +131,4 @@ dist
 
 # Ignorar credenciais do Firebase
 api-time-clock-key.json
+.vercel
