@@ -13,7 +13,6 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('API Time Clock');
-});
 
 // Buscar todos usuários
 app.get('/users', async (req, res) => {
