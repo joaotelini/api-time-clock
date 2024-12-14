@@ -6,14 +6,13 @@ import db from "./firebase-config.js";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 4001
+const port = process.env.PORT || 3000
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10);
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("API Time Clock");
-});
+app.get('/', (req, res) => {
+  res.send('API Time Clock');
 
 // Buscar todos usuários
 app.get('/users', async (req, res) => {
@@ -111,4 +110,5 @@ app.delete('/users/:id', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Servidor rodando em: http://localhost:${port}`);
+
 });
