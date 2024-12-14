@@ -11,6 +11,10 @@ const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10);
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("API Time Clock");
+});
+
 // Buscar todos usuários
 app.get('/users', async (req, res) => {
   const ref = db.ref('api-time-clock/users');
