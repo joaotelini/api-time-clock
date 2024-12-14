@@ -1,10 +1,9 @@
 import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const serviceAccount = JSON.parse(readFileSync('api-time-clock-key.json', 'utf-8'));
+const serviceAccount = JSON.parse(process.env.FIREBASE_KEY)
 
 // Inicializa o Firebase Admin SDK
 admin.initializeApp({
