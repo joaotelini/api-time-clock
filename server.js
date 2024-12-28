@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import db from "./firebase-config.js";
+import db from "./firebase/firebase-config.js";
 
 dotenv.config();
 
@@ -13,6 +13,7 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('API Time Clock');
+});
 
 // Buscar todos usuários
 app.get('/users', async (req, res) => {
