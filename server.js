@@ -2,12 +2,14 @@ import express from "express";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import db from "./firebase/firebase-config.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10);
+const SECRETKEY = process.env.SECRETKEY;
 
 app.use(express.json());
 
@@ -26,6 +28,46 @@ app.get('/users', async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar usuários', details: error });
   }
 });
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const ref = db.ref("api-time-clock/users");
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Todos os campos devem ser preenchidos." });
+    }
+
+    let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    
+    if (!regex.test(email)) {
+      return res.status(400).json({ message: "Email inválido." });
+    }
+
+    const snapshot = await ref.orderByChild("email").equalTo(email).once("value");
+
+    if (!snapshot.exists()) {
+      return res.status(401).json({ message: "Credenciais inválidas." });
+    }
+
+    const userKey = Object.keys(snapshot.val())[0];
+    const user = snapshot.val()[userKey];
+
+    const passValid = await bcrypt.compare(password, user.password);
+
+    if (!passValid) {
+      return res.status(401).json({ message: "Credenciais inválidas." });
+    }
+
+    const token = jwt.sign({ id: userKey }, SECRETKEY, { expiresIn: "1h" });
+
+    res.status(200).json({ message: "Login efetuado com sucesso.", token });
+
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao fazer login', details: error });
+  }
+
+})
 
 // Buscar usuário por ID
 app.get("/users/:id", async (req, res) => {
