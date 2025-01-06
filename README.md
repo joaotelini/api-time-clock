@@ -1,197 +1,129 @@
+# Documentação da API Time Clock
 
-# API Time Clock
+## Introdução
+A API Time Clock é um sistema para gerenciamento de usuários, autenticação e controle de acessos. Ela utiliza Express, Firebase Realtime Database e JWT para autenticação. Esta documentação descreve os endpoints disponíveis e seus respectivos usos.
 
-Esta é uma API construída com Express, MySQL e bcrypt. Ela foi projetada para gerenciar usuários em um sistema de "time clock" (controle de ponto), com funcionalidades de cadastro, listagem, edição e remoção de usuários.
+---
 
-## Funcionalidades
+## Configuração
+### Variáveis de Ambiente
+Certifique-se de configurar as variáveis de ambiente no arquivo `.env`:
+- `PORT`: Porta em que o servidor será executado (padrão: 3000).
+- `BCRYPT_SALT_ROUNDS`: Número de rounds para hashing de senha (ex.: 10).
+- `SECRETKEY`: Chave secreta para geração de tokens JWT.
 
-- **Cadastrar um usuário:** Adicione um novo usuário fornecendo informações como nome, e-mail, senha e função (admin ou employee).
-- **Listar usuários:** Consulte todos os usuários registrados.
-- **Editar usuários:** Edite informações de um usuário de acordo com seu ID.
-- **Buscar usuário por ID:** Obtenha informações de um usuário específico utilizando seu ID.
-- **Deletar um usuário:** Exclua um usuário da base de dados.
-
-## Tecnologias
-
-- **Express** - Framework web para Node.js.
-- **MySQL2** - Cliente MySQL para Node.js.
-- **bcrypt** - Biblioteca para hashing de senhas.
-- **dotenv** - Carrega variáveis de ambiente a partir de um arquivo `.env`.
-
-## Requisitos
-
-- Node.js (recomendado a versão 16 ou superior)
-- MySQL (instalado localmente ou remotamente)
-
-## Instalação
-
-### 1. Clonar o repositório
-
-Clone este repositório para a sua máquina local:
-
-```bash
-git clone https://github.com/seu-usuario/api-time-clock.git
-cd api-time-clock
-```
-
-### 2. Instalar dependências
-
-Instale as dependências do projeto:
-
-```bash
-npm install
-```
-
-### 3. Configurar variáveis de ambiente
-
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis de ambiente:
-
-```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password_here
-DB_NAME=api-time-clock
-BCRYPT_SALT_ROUNDS=10
-```
-
-Substitua os valores pelas suas configurações locais do banco de dados MySQL e a quantidade de salt rounds para o bcrypt.
-
-### 4. Criar o banco de dados
-
-Certifique-se de que você tenha o MySQL rodando e crie o banco de dados `api-time-clock`. Você pode fazer isso no MySQL com o seguinte comando:
-
-```sql
-CREATE DATABASE api-time-clock;
-```
-
-Em seguida, crie a tabela `Users`:
-
-```sql
-CREATE TABLE Users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  role ENUM('admin', 'employee') NOT NULL
-);
-```
-
-### 5. Rodar a API
-
-Agora, você pode iniciar o servidor:
-
-```bash
-npm start
-```
-
-O servidor estará disponível em `http://localhost:4001`.
+---
 
 ## Endpoints
 
-### `GET /`  
-Retorna uma mensagem simples de boas-vindas.
+### 1. **Root**
+- **Rota:** `/`
+- **Método:** `GET`
+- **Descrição:** Rota inicial da API.
+- **Resposta:** `API Time Clock`.
 
-**Resposta:**
+---
 
-```json
-{
-  "message": "Hello World!"
-}
-```
+### 2. **Listar Todos os Usuários**
+- **Rota:** `/users`
+- **Método:** `GET`
+- **Descrição:** Retorna todos os usuários cadastrados.
+- **Resposta:**
+  - **200:** Lista de usuários.
+  - **500:** Erro ao buscar usuários.
 
-### `GET /users`  
-Retorna uma lista de todos os usuários registrados.
+---
 
-**Resposta:**
+### 3. **Buscar Usuário por ID**
+- **Rota:** `/users/:id`
+- **Método:** `GET`
+- **Parâmetros:** 
+  - `id`: ID do usuário.
+- **Descrição:** Retorna os dados de um usuário específico.
+- **Resposta:**
+  - **200:** Dados do usuário.
+  - **404:** Usuário não encontrado.
+  - **500:** Erro ao buscar o usuário.
 
-```json
-[
+---
+
+### 4. **Login**
+- **Rota:** `/login`
+- **Método:** `POST`
+- **Body:**
+  ```json
   {
-    "id": 1,
-    "name": "João",
-    "email": "joao@example.com",
-    "role": "employee"
-  },
-  {
-    "id": 2,
-    "name": "Maria",
-    "email": "maria@example.com",
-    "role": "admin"
+    "email": "string",
+    "password": "string"
   }
-]
-```
+  ```
+- **Descrição:** Realiza o login do usuário e retorna um token JWT.
+- **Validações:**
+  - Campos obrigatórios: `email` e `password`.
+  - Email deve ser válido.
+- **Resposta:**
+  - **200:** Login efetuado com sucesso, retorna o token.
+  - **400:** Campos inválidos.
+  - **401:** Credenciais inválidas.
+  - **500:** Erro ao fazer login.
 
-### `GET /users/:id`  
-Retorna os dados de um usuário específico pelo ID.
+---
 
-**Exemplo de URL:**
-```
-GET /users/1
-```
+### 5. **Criar Usuário**
+- **Rota:** `/users`
+- **Método:** `POST`
+- **Body:**
+  ```json
+  {
+    "name": "string",
+    "email": "string",
+    "password": "string",
+    "role": "admin | employee"
+  }
+  ```
+- **Descrição:** Cria um novo usuário no sistema.
+- **Validações:**
+  - Campos obrigatórios: `name`, `email`, `password`, `role`.
+  - Email deve ser válido e único.
+  - Senha deve ter mais de 4 caracteres.
+  - Role deve ser `admin` ou `employee`.
+- **Resposta:**
+  - **201:** Usuário criado com sucesso.
+  - **400:** Campos inválidos.
+  - **409:** Usuário já cadastrado.
+  - **500:** Erro ao criar usuário.
 
-**Resposta:**
+---
 
-```json
-{
-  "id": 1,
-  "name": "João",
-  "email": "joao@example.com",
-  "role": "employee"
-}
-```
+### 6. **Remover Usuário**
+- **Rota:** `/users/:id`
+- **Método:** `DELETE`
+- **Parâmetros:** 
+  - `id`: ID do usuário.
+- **Descrição:** Remove um usuário do sistema.
+- **Resposta:**
+  - **200:** Usuário removido com sucesso.
+  - **400:** ID não encontrado.
+  - **500:** Erro ao remover usuário.
 
-### `POST /users`  
-Cria um novo usuário.
+---
 
-**Exemplo de corpo da requisição:**
+## Respostas Padrão
 
-```json
-{
-  "name": "Carlos",
-  "email": "carlos@example.com",
-  "password": "senha123",
-  "role": "employee"
-}
-```
+| Código | Significado                 | Descrição                                   |
+|--------|-----------------------------|-------------------------------------------|
+| 200    | OK                          | Requisição bem-sucedida.                  |
+| 201    | Created                     | Recurso criado com sucesso.               |
+| 400    | Bad Request                 | Requisição com dados inválidos.           |
+| 401    | Unauthorized                | Credenciais inválidas ou não autorizadas. |
+| 404    | Not Found                   | Recurso não encontrado.                   |
+| 409    | Conflict                    | Conflito de dados (ex.: email duplicado). |
+| 500    | Internal Server Error       | Erro interno do servidor.                 |
 
-**Resposta:**
+---
 
-```json
-{
-  "message": "Usuário criado com sucesso."
-}
-```
-
-### `DELETE /users/:id`  
-Deleta um usuário pelo ID.
-
-**Exemplo de URL:**
-```
-DELETE /users/1
-```
-
-**Resposta:**
-
-```json
-{
-  "message": "Usuário deletado com sucesso."
-}
-```
-
-## Testes
-
-Para testar os endpoints, você pode usar ferramentas como [Postman](https://www.postman.com/) ou [Insomnia](https://insomnia.rest/), configurando os métodos HTTP e o corpo das requisições conforme descrito acima.
-
-## Contribuição
-
-Contribuições são bem-vindas! Se você tiver alguma sugestão ou correção, fique à vontade para abrir uma **issue** ou **pull request**.
-
-1. Faça o fork do repositório.
-2. Crie uma nova branch (`git checkout -b minha-nova-feature`).
-3. Faça as alterações e comite (`git commit -am 'Adiciona nova feature'`).
-4. Envie para o repositório remoto (`git push origin minha-nova-feature`).
-5. Abra uma **pull request**.
-
-## Licença
-
-Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais informações.
+## Tecnologias Utilizadas
+- **Express.js**: Framework para construção de APIs.
+- **Firebase Realtime Database**: Banco de dados para armazenamento de usuários.
+- **JWT**: Gerenciamento de autenticação via tokens.
+- **bcrypt**: Criptografia de senhas.
