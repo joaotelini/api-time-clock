@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import db from "./firebase/firebase-config.js";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 import { isTokenExpired, getToken, removeToken } from "./utils/tokenVerify.js";
 
 dotenv.config();
@@ -13,6 +14,8 @@ const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10);
 const SECRETKEY = process.env.SECRETKEY;
 
 app.use(express.json());
+
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('API Time Clock');
