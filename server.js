@@ -97,7 +97,7 @@ app.post("/login", async (req, res) => {
     // Atualizar o banco de dados com o novo token
     await db.ref(`api-time-clock/users/${userKey}/token`).set(newToken);  // Alterado aqui
 
-    res.status(200).json({ message: "Login efetuado com sucesso.", token: newToken });
+    res.status(200).json({ message: "Login efetuado com sucesso.", token: newToken, user: email });
 
   } catch (error) {
     res.status(500).json({ error: 'Erro ao fazer login', details: error });
