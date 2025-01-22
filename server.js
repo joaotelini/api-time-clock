@@ -9,7 +9,7 @@ import { isTokenExpired, getToken, removeToken } from "./utils/tokenVerify.js";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10);
 const SECRETKEY = process.env.SECRETKEY;
 
@@ -92,12 +92,12 @@ app.post("/login", async (req, res) => {
     }
 
     // Gerar novo token JWT
-    const newToken = jwt.sign({ id: userKey }, SECRETKEY, { expiresIn: 50 });
+    const newToken = jwt.sign({ id: userKey }, SECRETKEY, { expiresIn: '1h' });
 
     // Atualizar o banco de dados com o novo token
     await db.ref(`api-time-clock/users/${userKey}/token`).set(newToken);  // Alterado aqui
 
-    res.status(200).json({ message: "Login efetuado com sucesso.", token: newToken });
+    res.status(200).json({ message: "Login efetuado com sucesso.", token: newToken, user: userKey });
 
   } catch (error) {
     res.status(500).json({ error: 'Erro ao fazer login', details: error });
