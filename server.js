@@ -149,6 +149,17 @@ app.post('/users', async (req, res) => {
   }
 });
 
+app.post("/logout", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    await removeToken(id);
+    res.status(200).json({ message: "Logout efetuado com sucesso." });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao fazer logout', details: error });
+  }
+});
+
 // **DELETE** - Remover usuário
 app.delete('/users/:id', async (req, res) => {
   const { id } = req.params;
