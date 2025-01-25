@@ -24,7 +24,9 @@ export async function getToken(userId) {
     const tokenSnapshot = await tokenRef.once("value");
 
     if (tokenSnapshot.exists()) {
-      return tokenSnapshot.val().token;
+      const token = tokenSnapshot.val();
+      return token
+
     } else {
       return null; // Retorna null se o token não existir
     }
@@ -35,13 +37,18 @@ export async function getToken(userId) {
 }
 
 // Função para remover token expirado
-export async function removeToken(userId) {
-  const userTokenRef = db.ref(`api-time-clock/users/${userId}/token`);
-
+// Função para remover o token
+export async function removeToken(userId, token) {
   try {
-    await userTokenRef.remove();
-    console.log(`Token do usuário ${userId} removido.`);
+    // Já estamos passando o userId diretamente da requisição
+    const userTokenRef = db.ref(`api-time-clock/users/${userId}/token`);
+
+    await userTokenRef.remove();  // Remove o token do usuário no banco de dados
+
+    console.log('Token removido com sucesso!');
+    
   } catch (error) {
     console.error("Erro ao remover token:", error);
+    throw new Error('Erro ao remover token');
   }
 }

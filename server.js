@@ -84,7 +84,7 @@ app.post("/login", async (req, res) => {
     }
 
     // Obter o token do banco de dados
-    const token = await getToken(userKey);  // Passar o userKey aqui
+    const token = await getToken(userKey);
 
     // Verificar se o token está expirado
     if (isTokenExpired(token)) {
@@ -95,7 +95,7 @@ app.post("/login", async (req, res) => {
     const newToken = jwt.sign({ id: userKey }, SECRETKEY, { expiresIn: '1h' });
 
     // Atualizar o banco de dados com o novo token
-    await db.ref(`api-time-clock/users/${userKey}/token`).set(newToken);  // Alterado aqui
+    await db.ref(`api-time-clock/users/${userKey}/token`).set(newToken);
 
     res.status(200).json({ message: "Login efetuado com sucesso.", token: newToken, user: userKey });
 
@@ -150,15 +150,23 @@ app.post('/users', async (req, res) => {
 });
 
 app.post("/logout", async (req, res) => {
-  const { id } = req.body;
+  const { token } = req.body;
 
   try {
-    await removeToken(id);
+    // Extrair userId diretamente do token
+    const decoded = jwt.decode(token);  // Decodificar o token para pegar o userId
+    if (!decoded || !decoded.id) {
+      return res.status(400).json({ message: "Token inválido ou expirado" });
+    }
+    
+    // Passar o id extraído do token para a função removeToken
+    await removeToken(decoded.id, token);  // Agora remove o token baseado no id do usuário
     res.status(200).json({ message: "Logout efetuado com sucesso." });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao fazer logout', details: error });
   }
 });
+
 
 // **DELETE** - Remover usuário
 app.delete('/users/:id', async (req, res) => {
